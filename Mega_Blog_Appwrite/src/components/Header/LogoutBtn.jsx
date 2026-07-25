@@ -10,9 +10,11 @@ function LogoutBtn() {
   const navigate = useNavigate()
 
   const logoutHandler = () => {
-    authService.logout().then(() => {dispatch(logout)})
-    navigate('/')
-    window.location.reload()
+    authService.logout().then(() => {
+      dispatch(logout())
+      navigate('/')
+      window.location.reload()
+    })
   }
   return (
     <button className='inline-block px-6 py-2 duration-200 hover:bg-blue-100 rounded-full' onClick={logoutHandler}>Logout</button>

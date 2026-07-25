@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import appwriteService from '../../appwrite/config'
 
-function PostForm(post) {
+function PostForm({post}) {
     const {register, handleSubmit, watch, setValue, control, getValues} = useForm({
         defaultValues: {
             title: post?.title || '',
@@ -16,10 +16,17 @@ function PostForm(post) {
     })
 
     const navigate = useNavigate()
-    const userData = useSelector(state => state.user.userData)
+    const userData = useSelector(state => state.auth.userData)
 
-    const submit = async(post) => {
+    const submit = async(data) => {
+        console.log("Current UserData:", userData); // Check if this prints an object with $id or null/undefined!
+    
+        if (!userData) {
+            alert("You are not logged in according to component state!");
+            return;
+        }
         if(post){
+            console.log("coming here")
             const file = data.image[0] ? appwriteService.fileUpload(data.image[0]) : null
             
             if(file) {
@@ -32,16 +39,21 @@ function PostForm(post) {
                 navigate(`/post/${dbPost.$id}`)
             }
         } else {
+            console.log("not coming here")
             const file = await appwriteService.fileUpload(data.image[0])
 
             if(file) {
                 const fileId = file.$id
                 data.featuredImage = fileId
 
+                console.log(fileId)
+
                 const dbPost = await appwriteService.createPost({
                     ...data,
                     userId: userData.$id
                 })
+
+                console.log(dbPost)
 
                 if(dbPost) navigate(`/post/${dbPost.$id}`)
             }
@@ -49,10 +61,16 @@ function PostForm(post) {
     }
 
     const slugTransform = useCallback((value) => {
-        if(value && typeof value === 'string') return value.trim().toLowerCase().replace(/^[a-zA-Z\d\s]/g, '-')
+        if (value && typeof value === 'string') {
+            return value
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-zA-Z\d\s]+/g, '-') // Replaces special chars with hyphens
+                .replace(/\s+/g, '-');         // Replaces spaces with hyphens
+        }
         
-        return ''
-    }, [])
+        return '';
+    }, []);
 
     useEffect(() => {
         const subscription = watch((value, {name}) => {

@@ -13,7 +13,7 @@ function App() {
   useEffect(() => {
     authService.getCurrentUser()
     .then((userData) => {
-      if(userData) dispatch(login(userData));
+      if(userData) dispatch(login({userData}));
       else dispatch(logout())
     })
     .finally(() => setLoading(false))
@@ -30,7 +30,7 @@ function App() {
         <Footer />
       </div>
     </div>
-  ) : (null)
+  ) : <div>Loading session...</div>;
 }
 
 export default App

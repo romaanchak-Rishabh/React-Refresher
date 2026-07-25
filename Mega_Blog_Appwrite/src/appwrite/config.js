@@ -76,11 +76,16 @@ export class Service {
         }
     }
 
+    // In your Appwrite Service class:
     getFilePreview(fileId) {
+        if (!fileId) return '';
         try {
-            return this.bucket.getFilePreview(conf.appwriteBucketId, fileId)
+            const previewUrl = this.bucket.getFileView(conf.appwriteBucketId, fileId);
+            console.log(previewUrl?.toString())
+            return previewUrl?.toString();
         } catch (error) {
-            console.log(error)
+            console.log("Appwrite service :: getFilePreview :: error", error);
+            return '';
         }
     }
 }
